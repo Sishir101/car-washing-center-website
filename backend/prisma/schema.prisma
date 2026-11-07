@@ -1,0 +1,48 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  phone     String?
+  password  String
+  role      String    @default("CUSTOMER") // CUSTOMER or OWNER
+  createdAt DateTime  @default(now())
+  bookings  Booking[]
+}
+
+model Service {
+  id              Int       @id @default(autoincrement())
+  name            String
+  category        String    // BIKE or CAR
+  vehicleSize     String    // Standard, Small Cars, Sedan, SUV
+  description     String
+  price           Float
+  durationMinutes Int       @default(45)
+  image           String?
+  bookings        Booking[]
+  createdAt       DateTime  @default(now())
+}
+
+model Booking {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  user          User     @relation(fields: [userId], references: [id])
+  serviceId     Int
+  service       Service  @relation(fields: [serviceId], references: [id])
+  vehicleNumber String   // e.g. "OD 15 A 1234"
+  vehicleModel  String   // e.g. "Hyundai Creta", "Royal Enfield 350"
+  bookingDate   String   // Format: "YYYY-MM-DD"
+  timeSlot      String   // e.g. "10:00 AM - 11:00 AM"
+  totalAmount   Float
+  status        String   @default("CONFIRMED") // CONFIRMED, IN_WASH, READY_FOR_PICKUP, COMPLETED, CANCELLED
+  notes         String?
+  createdAt     DateTime @default(now())
+}

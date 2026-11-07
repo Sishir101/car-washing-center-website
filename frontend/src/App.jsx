@@ -21,11 +21,13 @@ import {
   Check,
 } from 'lucide-react';
 
+import { DEFAULT_SERVICES } from './data/defaultServices';
+
 export default function App() {
   const { user, API_URL } = useAuth();
   const [activeTab, setActiveTab] = useState('BIKE'); // 'BIKE', 'CAR_SMALL', 'CAR_SUV'
-  const [allServices, setAllServices] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [allServices, setAllServices] = useState(DEFAULT_SERVICES);
+  const [loading, setLoading] = useState(false);
 
   // Modals
   const [selectedServiceForBooking, setSelectedServiceForBooking] = useState(null);
@@ -34,17 +36,16 @@ export default function App() {
   const [showOwnerQueueModal, setShowOwnerQueueModal] = useState(false);
 
   const fetchServices = async () => {
-    setLoading(true);
     try {
       const res = await fetch(`${API_URL}/services`);
-      const data = await res.json();
       if (res.ok) {
-        setAllServices(data.services || []);
+        const data = await res.json();
+        if (data.services && data.services.length > 0) {
+          setAllServices(data.services);
+        }
       }
     } catch (err) {
-      console.error('Failed to fetch services:', err);
-    } finally {
-      setLoading(false);
+      console.warn('API sync using default catalog:', err);
     }
   };
 
